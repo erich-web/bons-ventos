@@ -1,0 +1,11 @@
+import { compute } from '../src/engine/compute';
+import { baseScenario } from '../src/engine/scenarios';
+import { tornado, heatmap, breakEvenOccupancy, breakEvenWeddings, requiredStake, compareGuaranteeModels, DRIVERS } from '../src/engine/analysis';
+const s = baseScenario();
+let t0 = performance.now();
+const tr = tornado(s, 'irrProject'); console.log('tornado ms', (performance.now()-t0).toFixed(0)); for (const r of tr) console.log(' ', r.label.padEnd(28), r.lowLabel, ((r.low??0)*100).toFixed(1), '|', r.highLabel, ((r.high??0)*100).toFixed(1));
+t0 = performance.now(); const hm = heatmap(s, 'investorIRR', DRIVERS[0], DRIVERS[1], 5); console.log('heatmap ms', (performance.now()-t0).toFixed(0)); console.log(hm.yLabels, hm.values.map(r=>r.map(v=>v===null?'-':(v*100).toFixed(0)).join(' ')));
+t0 = performance.now(); console.log('BE occ', breakEvenOccupancy(s), 'BE dscr', breakEvenOccupancy(s,'dscr'), 'BE weddings', breakEvenWeddings(s), 'ms', (performance.now()-t0).toFixed(0));
+t0 = performance.now(); const rs = requiredStake(s, { contribution: 2300000, guaranteeCommitted: 10535000, guaranteeFeePct: 0.015, targetIRR: 0.25, horizonYears: 10 }); console.log('required stake for 25%', rs.stake, 'ms', (performance.now()-t0).toFixed(0));
+const cg = compareGuaranteeModels(s); for (const c of cg) console.log(c.label, 'cost', (c.costTotal/1e6).toFixed(2), 'PV', (c.costPV/1e6).toFixed(2), 'invIRR', ((c.investorIRR??0)*100).toFixed(1), 'exIRR', ((c.existingIRR??0)*100).toFixed(1), 'dil', (c.dilution*100).toFixed(1));
+const r = compute(s); console.log('base inv irr', r.parties.at(-1)!.irr, 'stake', r.capTable.at(-1)!.stakePost);
