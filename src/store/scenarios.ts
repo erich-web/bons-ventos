@@ -5,7 +5,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Scenario, ProvenanceEntry } from '../engine/types';
-import { excelScenario, baseScenario, conservativeScenario, optimisticScenario } from '../engine/scenarios';
+import { excelScenario, baseScenario, conservativeScenario, optimisticScenario, ianErichScenario } from '../engine/scenarios';
 import { setPath, getPath } from '../engine/analysis';
 
 export interface Proposal {
@@ -33,15 +33,15 @@ interface State {
   importScenario: (s: Scenario) => void;
 }
 
-const factory: Record<string, () => Scenario> = { 'excel-r05': excelScenario, base: baseScenario, conservador: conservativeScenario, otimista: optimisticScenario };
-const defaults = () => [excelScenario(), baseScenario(), conservativeScenario(), optimisticScenario()];
+const factory: Record<string, () => Scenario> = { 'excel-r05': excelScenario, 'base-ian-erich': ianErichScenario, base: baseScenario, conservador: conservativeScenario, otimista: optimisticScenario };
+const defaults = () => [excelScenario(), ianErichScenario(), baseScenario(), conservativeScenario(), optimisticScenario()];
 
 export const useScenarios = create<State>()(
   persist(
     (set, get) => ({
       scenarios: defaults(),
-      activeId: 'base',
-      compareIds: ['base', 'conservador', 'otimista'],
+      activeId: 'base-ian-erich',
+      compareIds: ['base-ian-erich', 'base', 'conservador', 'otimista'],
       proposals: [],
       setActive: (id) => set({ activeId: id }),
       setCompare: (ids) => set({ compareIds: ids.slice(0, 4) }),
@@ -75,10 +75,10 @@ export const useScenarios = create<State>()(
       },
       remove: (id) => set((st) => {
         const scenarios = st.scenarios.filter((s) => s.id !== id || s.kind === 'excel' || s.kind === 'base');
-        return { scenarios, activeId: st.activeId === id ? 'base' : st.activeId, compareIds: st.compareIds.filter((c) => c !== id) };
+        return { scenarios, activeId: st.activeId === id ? 'base-ian-erich' : st.activeId, compareIds: st.compareIds.filter((c) => c !== id) };
       }),
       resetToOriginal: (id) => set((st) => ({ scenarios: st.scenarios.map((s) => (s.id === id && factory[id] ? factory[id]() : s)) })),
-      resetAll: () => set({ scenarios: defaults(), activeId: 'base', compareIds: ['base', 'conservador', 'otimista'], proposals: [] }),
+      resetAll: () => set({ scenarios: defaults(), activeId: 'base-ian-erich', compareIds: ['base-ian-erich', 'base', 'conservador', 'otimista'], proposals: [] }),
       addProposal: (p) => set((st) => ({ proposals: [p, ...st.proposals].slice(0, 30) })),
       removeProposal: (id) => set((st) => ({ proposals: st.proposals.filter((p) => p.id !== id) })),
       importScenario: (sc) => set((st) => ({ scenarios: [...st.scenarios.filter((s) => s.id !== sc.id), { ...sc, kind: sc.kind === 'excel' ? 'custom' : sc.kind }], activeId: sc.id })),
@@ -94,7 +94,7 @@ export const useScenarios = create<State>()(
         const ids = new Set(saved.map((s) => s.id));
         const base = defaults().filter((d) => !ids.has(d.id));
         const scenarios = [excelScenario(), ...base.filter((d) => d.kind !== 'excel'), ...saved].map((s) => ensureSchema(s));
-        return { ...current, ...p, scenarios, activeId: p.activeId && scenarios.some((s) => s.id === p.activeId) ? p.activeId : 'base' };
+        return { ...current, ...p, scenarios, activeId: p.activeId && scenarios.some((s) => s.id === p.activeId) ? p.activeId : 'base-ian-erich' };
       },
     },
   ),

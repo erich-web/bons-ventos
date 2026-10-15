@@ -3,6 +3,7 @@
  * e cenários revisados (Base, Conservador, Otimista) com premissas novas marcadas por origem.
  */
 import excel from '../data/excel-r05.json';
+import ianErich from '../data/modelo-base-ian-erich.json';
 import type { Scenario, ProvenanceMap, StaffPosition, CapexItemSeries, Grid, LoanAssumptions, YM } from './types';
 
 type ExcelData = typeof excel;
@@ -329,4 +330,28 @@ export function applyDebtStructure(s: Scenario, which: 'A' | 'B' | 'C'): Scenari
   return c;
 }
 
-export const ALL_SCENARIOS = () => [excelScenario(), baseScenario(), conservativeScenario(), optimisticScenario()];
+/** Caminhos alterados por Ian/Erich em relação ao Base (15/10/2026), para o registro de premissas. */
+const IAN_ERICH_CHANGES: [string, string][] = [
+  ['hotel.phase1.constructionStart', 'Obra iniciada em set/2026, 22 meses (inauguração set/2028).'],
+  ['hotel.phase1.categories', 'Índices tarifários da tipologia revistos (piscina 1,25×, vista mar 1,10×).'],
+  ['hotel.occupancyNormal', 'Hotel fechado em abril e maio; junho com ocupação revista.'],
+  ['hotel.occupancySpecial', 'Dias especiais: fechado abr/mai; out–dez a 90–100%.'],
+  ['hotel.rateGrowth', 'Crescimento tarifário 15%, 15%, 10% nos anos 2–4.'],
+  ['hotel.shareOTA', '50% da receita de diárias intermediada (OTAs/agências).'],
+  ['weddings', '0 → 5 → 10 → 12 casamentos/ano, 180 convidados, catering e bebidas próprios desde o ano 1, sem locação/pool party, consumo extra R$ 250/hóspede-noite, preços +8% a.a.'],
+  ['restaurant', 'Giro reduzido (0,3–1,0), ticket R$ 180–220 crescendo 15%/10% a.a., A&B hóspedes R$ 150, outros custos diretos 15%.'],
+  ['beachClub', 'Fechado abr/mai, ticket R$ 300 (+10% a.a.), CMO 25%, sem experiências.'],
+  ['loans', 'BNB Fase 01 de R$ 6,3 M com 60 meses de carência e juros capitalizados; Fase 02 R$ 8,0 M.'],
+  ['guarantees', 'Obra executada aceita integralmente como garantia evolutiva; remuneração do garantidor pelo modelo C (participação adicional), referência 3% a.a.'],
+  ['equity.investor', 'Aporte do novo investidor R$ 2,0 M.'],
+];
+export function ianErichScenario(): Scenario {
+  const base = baseScenario();
+  const s = clone(ianErich) as unknown as Scenario;
+  s.capex.phase1.excelSeries = base.capex.phase1.excelSeries;
+  s.capex.phase2.excelSeries = base.capex.phase2.excelSeries;
+  for (const [path, note] of IAN_ERICH_CHANGES) s.provenance[path] = { source: 'doc', status: 'revised', note: `Ajustado por Ian e Erich em 15/10/2026 — ${note}` };
+  return s;
+}
+
+export const ALL_SCENARIOS = () => [excelScenario(), ianErichScenario(), baseScenario(), conservativeScenario(), optimisticScenario()];

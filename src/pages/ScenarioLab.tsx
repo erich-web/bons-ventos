@@ -132,7 +132,7 @@ function ScenarioManager() {
                     <div className="flex justify-end gap-1 flex-wrap">
                       {!active && <button className="btn btn-ghost py-0.5" onClick={() => setActive(sc.id)}>Ativar</button>}
                       <button className="btn btn-ghost py-0.5" onClick={() => duplicate(sc.id)}>Duplicar</button>
-                      {['base', 'conservador', 'otimista'].includes(sc.id) && <button className="btn btn-ghost py-0.5" onClick={() => { if (confirm(`Restaurar as premissas originais de "${sc.name}"?`)) resetToOriginal(sc.id); }}>Restaurar</button>}
+                      {['base-ian-erich', 'base', 'conservador', 'otimista'].includes(sc.id) && <button className="btn btn-ghost py-0.5" onClick={() => { if (confirm(`Restaurar as premissas originais de "${sc.name}"?`)) resetToOriginal(sc.id); }}>Restaurar</button>}
                       <button className="btn btn-ghost py-0.5" onClick={() => exportScenarioJSON(sc)}>JSON</button>
                       {sc.kind !== 'excel' && sc.kind !== 'base' && <button className="btn btn-ghost py-0.5 text-rust" onClick={() => { if (confirm(`Excluir o cenário "${sc.name}"?`)) remove(sc.id); }}>Excluir</button>}
                     </div>

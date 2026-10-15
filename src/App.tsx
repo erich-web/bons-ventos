@@ -103,7 +103,7 @@ function TopBar() {
         </select>
         {locked ? <span className="chip bg-sand text-ink-2">somente leitura · réplica do Excel</span> : <span className="chip bg-gold-2/60 text-ink-2">{s.kind === 'custom' ? 'personalizado' : 'revisado'}</span>}
         <button className="btn" onClick={() => duplicate(activeId)}>Duplicar</button>
-        {['base', 'conservador', 'otimista'].includes(activeId) && <button className="btn" onClick={() => { if (confirm('Restaurar as premissas originais deste cenário?')) resetToOriginal(activeId); }}>Restaurar premissas</button>}
+        {['base-ian-erich', 'base', 'conservador', 'otimista'].includes(activeId) && <button className="btn" onClick={() => { if (confirm('Restaurar as premissas originais deste cenário?')) resetToOriginal(activeId); }}>Restaurar premissas</button>}
       </div>
       <div className="flex items-center gap-5 text-[12px] text-ink-2">
         <Mini label="TIR projeto" v={fmtPct(m.irrProject)} />
